@@ -72,7 +72,7 @@ class DjvuViewerPlugin
 ?>
 <div>
 	<applet 
-		archive="<?php echo WEB_DIR . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar" 
+		archive="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar" 
 		code="com.lizardtech.djview.Applet.class" 
 		style="border:0px none;"
         width="<?php echo is_admin_theme() ? get_option('djvuviewer_width_admin') : get_option('djvuviewer_width_public'); ?>" 
@@ -81,7 +81,7 @@ class DjvuViewerPlugin
 	>
 	<param name="data" value="<?php echo $this->_getUrl($file); ?>">
 	<param name="image" value="http://www.bu-unishk.org">
-	<param name="cache_archive" value="<?php echo WEB_DIR . DIRECTORY_SEPARATOR . 'plugins' . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar"> 
+	<param name="cache_archive" value="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar"> 
 	</applet>
 </div>
 
