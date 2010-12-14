@@ -69,7 +69,6 @@ class DjvuViewerPlugin
             if (!in_array($extension, $this->_supportedFiles)) {
                 continue;
             }
-echo WEB_DIR;
 ?>
 <div>
 	<applet 
