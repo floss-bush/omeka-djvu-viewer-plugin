@@ -104,3 +104,4 @@ class DjvuViewerPlugin
 		return WEB_FILES . '/' . $file->archive_filename;
     }
 }
+
