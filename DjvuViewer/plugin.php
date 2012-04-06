@@ -70,19 +70,29 @@ class DjvuViewerPlugin
                 continue;
             }
 ?>
-<div>
-	<applet 
-		archive="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar" 
-		code="com.lizardtech.djview.Applet.class" 
-		style="border:0px none;"
-        width="<?php echo is_admin_theme() ? get_option('djvuviewer_width_admin') : get_option('djvuviewer_width_public'); ?>" 
-        height="<?php echo is_admin_theme() ? get_option('djvuviewer_height_admin') : get_option('djvuviewer_height_public'); ?>" 
 
-	>
-	<param name="data" value="<?php echo $this->_getUrl($file); ?>">
-	<param name="image" value="http://www.bu-unishk.org">
-	<param name="cache_archive" value="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar"> 
-	</applet>
+<div>
+    <script src="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR; ?>/deployJava.js"></script>
+    <script>
+    var attributes = {
+                      codebase:'<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>',
+                      code:'com.lizardtech.djview.Applet.class',
+                      archive:'<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar',
+                      width:<?php echo is_admin_theme() ? get_option('djvuviewer_width_admin') : get_option('djvuviewer_width_public'); ?>, 
+                      height:<?php echo is_admin_theme() ? get_option('djvuviewer_height_admin') : get_option('djvuviewer_height_public'); ?>
+    } ;
+    var parameters = {
+            cache_archive:"<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar",
+            data:"<?php echo $this->_getUrl($file); ?>"
+    } ;
+    if (deployJava.versionCheck('1.6')) {
+        deployJava.runApplet(attributes, parameters, '1.6');
+    } else {
+        document.write('<div style="margin: 100px auto; width: 400px; font-size: 1.5em">');
+        document.write('Java plugin is necessary to view this page. <a href="http://java.com" target="_blank">Click here</a> to install.');
+        document.write('</div>');
+    }
+    </script>
 </div>
 
 <?php
