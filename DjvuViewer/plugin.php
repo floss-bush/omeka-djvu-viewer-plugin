@@ -51,7 +51,7 @@ class DjvuViewerPlugin
         set_option('djvuviewer_height_public', $post['djvuviewer_height_public']);
     }
     
-    public static function append()
+    public static function append( $currentFile = "" )
     {
         // Embed viewer only if configured to do so.
         if ((is_admin_theme() && !get_option('djvuviewer_embed_admin')) || 
@@ -59,43 +59,45 @@ class DjvuViewerPlugin
             return;
         }
         $docsViewer = new DjvuViewerPlugin;
-        $docsViewer->embed();
+        $docsViewer->embed( $currentFile );
     }
     
-    public function embed()
+    public function embed ( $currentFile = "" )
     {
         foreach (__v()->item->Files as $file) {
-            $extension = pathinfo($file->archive_filename, PATHINFO_EXTENSION);
-            if (!in_array($extension, $this->_supportedFiles)) {
-                continue;
+            if($file->id == $currentFile) {
+                $extension = pathinfo($file->archive_filename, PATHINFO_EXTENSION);
+                if (!in_array($extension, $this->_supportedFiles)) {
+                    continue;
+                }
+
+                ?>
+                <div>
+                    <script src="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR; ?>/deployJava.js"></script>
+                    <script>
+                    var attributes = {
+                                      codebase:'<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>',
+                                      code:'com.lizardtech.djview.Applet.class',
+                                      archive:'<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar',
+                                      width:<?php echo is_admin_theme() ? get_option('djvuviewer_width_admin') : get_option('djvuviewer_width_public'); ?>, 
+                                      height:<?php echo is_admin_theme() ? get_option('djvuviewer_height_admin') : get_option('djvuviewer_height_public'); ?>
+                    } ;
+                    var parameters = {
+                            cache_archive:"<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar",
+                            data:"<?php echo $this->_getUrl($file); ?>"
+                    } ;
+                    if (deployJava.versionCheck('1.6')) {
+                        deployJava.runApplet(attributes, parameters, '1.6');
+                    } else {
+                        document.write('<div style="margin: 100px auto; width: 400px; font-size: 1.5em">');
+                        document.write('Java plugin is necessary to view this page. <a href="http://java.com" target="_blank">Click here</a> to install.');
+                        document.write('</div>');
+                    }
+                    </script>
+                </div>
+
+                <?php
             }
-?>
-
-<div>
-    <script src="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR; ?>/deployJava.js"></script>
-    <script>
-    var attributes = {
-                      codebase:'<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>',
-                      code:'com.lizardtech.djview.Applet.class',
-                      archive:'<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar',
-                      width:<?php echo is_admin_theme() ? get_option('djvuviewer_width_admin') : get_option('djvuviewer_width_public'); ?>, 
-                      height:<?php echo is_admin_theme() ? get_option('djvuviewer_height_admin') : get_option('djvuviewer_height_public'); ?>
-    } ;
-    var parameters = {
-            cache_archive:"<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar",
-            data:"<?php echo $this->_getUrl($file); ?>"
-    } ;
-    if (deployJava.versionCheck('1.6')) {
-        deployJava.runApplet(attributes, parameters, '1.6');
-    } else {
-        document.write('<div style="margin: 100px auto; width: 400px; font-size: 1.5em">');
-        document.write('Java plugin is necessary to view this page. <a href="http://java.com" target="_blank">Click here</a> to install.');
-        document.write('</div>');
-    }
-    </script>
-</div>
-
-<?php
         }
     }
     
@@ -103,5 +105,16 @@ class DjvuViewerPlugin
     {
 		return WEB_FILES . '/' . $file->archive_filename;
     }
-}
 
+    public function hasDjvuFile() {
+        foreach (__v()->item->Files as $file) {
+            $extension = pathinfo($file->archive_filename, PATHINFO_EXTENSION);
+            if ( $extension != 'djvu' ) {
+                return false;
+            } else {
+                return true;
+            } 
+        }
+    }
+
+}
