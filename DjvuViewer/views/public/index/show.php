@@ -13,9 +13,9 @@
         } ;
         var parameters = {
                 cache_archive:"<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar",
-                data:"<?php echo WEB_FILES . '/' . $this->filename; ?>"
+                data:"<?php echo WEB_FILES . '/' . $this->filename . '.djvu'; ?>"
         } ;
-        if (deployJava.versionCheck('1.6')) {
+        if (deployJava.versionCheck('1.6+')) {
             deployJava.runApplet(attributes, parameters, '1.6');
         } else {
             document.write('<div style="margin: 100px auto; width: 400px; font-size: 1.5em">');

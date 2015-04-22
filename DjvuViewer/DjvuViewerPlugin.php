@@ -6,11 +6,15 @@
  *
  * @package DjvuViewer
  * @author Gjergj Sheldija, <gjergj.sheldija@gmail.com>
- * @copyright Copyright 2012-2013 Gjergj Sheldija
+ * @copyright Copyright 2012-2015 Gjergj Sheldija
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
-
-class DjvuViewerPlugin extends Omeka_Plugin_Abstract
+/**
+ * The DjVU Viewer plugin.
+ * 
+ * @package Omeka\Plugins\DjvuViewer
+ */
+class DjvuViewerPlugin extends Omeka_Plugin_AbstractPlugin
 {
 
     protected $_hooks = array(
@@ -42,35 +46,43 @@ class DjvuViewerPlugin extends Omeka_Plugin_Abstract
 
     public function hookConfigForm()
     {
-        include 'config_form.php';
+    	require dirname(__FILE__) . '/config_form.php';
     }
 
-    public function hookConfig($post)
+    public function hookConfig()
     {
-        if (!is_numeric($post['djvuviewer_width_public']) ||
-            !is_numeric($post['djvuviewer_height_public'])) {
-            throw new Exception('The width and height must be numeric.');
+        if (!is_numeric($_POST['djvuviewer_width_public']) ||
+            !is_numeric($_POST['djvuviewer_height_public'])) {
+            throw new Omeka_Validate_Exception('The width and height must be numeric.');
         }
 
-        set_option('djvuviewer_embed_public', (int) (boolean) $post['djvuviewer_embed_public']);
-        set_option('djvuviewer_width_public', $post['djvuviewer_width_public']);
-        set_option('djvuviewer_height_public', $post['djvuviewer_height_public']);
+        set_option('djvuviewer_embed_public', (int) (boolean) $_POST['djvuviewer_embed_public']);
+        set_option('djvuviewer_width_public', $_POST['djvuviewer_width_public']);
+        set_option('djvuviewer_height_public', $_POST['djvuviewer_height_public']);
     }
 
-    public function hookDefineRoutes($router)
+    public function hookDefineRoutes($args)
     {
+
+        if (is_admin_theme()) {
+            return;
+        }
+
+		$router = $args['router'];
+
         $router->addRoute(
-            'djvuviewer_show_route',
+            'djvu_viewer',
             new Zend_Controller_Router_Route(
                 'djvu-viewer/index/show/:filename',
                 array(
-                    'module'       => 'djvu-viewer  ',
+                    'module'       => 'djvu-viewer',
                     'controller'   => 'index',
                     'action'       => 'show'
                     ),
                 array( 'filename'  => '\s+')
             )
         );
+
     }
 
     public function djvuviewer_embed ( $Files = "" )
@@ -81,12 +93,11 @@ class DjvuViewerPlugin extends Omeka_Plugin_Abstract
         }
 
         foreach ($Files as $file) {
-            $extension = pathinfo($file->archive_filename, PATHINFO_EXTENSION);
+            $extension = pathinfo($file->filename, PATHINFO_EXTENSION);
             if (!in_array($extension, $this->_supportedFiles)) {
                 continue;
             }
 
-            echo $file;
             ?>
             <div>
                 <script src="<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR; ?>/deployJava.js"></script>
@@ -102,7 +113,8 @@ class DjvuViewerPlugin extends Omeka_Plugin_Abstract
                         cache_archive:"<?php echo WEB_PLUGIN . DIRECTORY_SEPARATOR . 'DjvuViewer' . DIRECTORY_SEPARATOR . 'applet' ?>/javadjvu.jar",
                         data:"<?php echo $this->_getUrl($file); ?>"
                 } ;
-                if (deployJava.versionCheck('1.6')) {
+
+                if (deployJava.versionCheck('1.6+')) {
                     deployJava.runApplet(attributes, parameters, '1.6');
                 } else {
                     document.write('<div style="margin: 100px auto; width: 400px; font-size: 1.5em">');
@@ -121,7 +133,7 @@ class DjvuViewerPlugin extends Omeka_Plugin_Abstract
     }
 
     public function djvuviewer_hasDjvuFile() {
-        foreach (__v()->item->Files as $file) {
+        foreach (get_view()->item->Files as $file) {
             $extension = pathinfo($file->archive_filename, PATHINFO_EXTENSION);
             if ( $extension != 'djvu' ) {
                 return false;
